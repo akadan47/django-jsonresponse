@@ -3,7 +3,7 @@ import functools
 import logging
 from collections import Iterable
 
-from django.http import HttpResponse
+from django.http import HttpResponse, Http404
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 
@@ -346,11 +346,11 @@ class to_json(object):
             logger.exception("Error occurrid while processing reuest [{0}] {1}".format(
                 req.method, req.path))
 
-            if int(req.GET.get('raise', 0)):
+            if int(req.GET.get('raise', 0) or isinstance(e, Http404)):
                 raise
 
             data = self.err_to_response(e)
-            status = 404 if isinstance(e, ObjectDoesNotExist) else self.error_code
+            status = self.error_code
 
         return self.render_data(req, data, status)
 
